@@ -88,15 +88,11 @@ class GoogleController extends Controller
      */
     public function store(Request $request)
     {
-        $this->client = new  Google_Client();
-        $filePath = base_path("client_secret.json");
-        $this->client->setAuthConfig($filePath);
-        $this->client->setScopes(array('https://www.googleapis.com/auth/calendar'));
-        $this->authURL = $this->client->createAuthUrl();
-        if($code=session()->get('code',null)){
-            $this->client->fetchAccessTokenWithAuthCode($code);
-            dd($this->client->getAccessToken());
-            //$this->client->setAccessToken();
+        if ($this->client->isAccessTokenExpired()) {
+            $accessToken = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
+            $venue->update([
+                'gcalendar_credentials' => json_encode($accessToken),
+            ]);
         }
          $request->all();
         $service = new \Google_Service_Calendar($this->client);
