@@ -25,8 +25,12 @@ class GoogleController extends Controller
      */
     public function index()
     {
+        if($token=session()->get('token',''))
+            return redirect('callback');
+        else
+            return view('pages.google')->with('authurl', $this->authURL);
 
-        return view('pages.google')->with('authurl', $this->authURL);
+//        return view('pages.google')->with('authurl', $this->authURL);
 
     }
 
@@ -88,13 +92,11 @@ class GoogleController extends Controller
      */
     public function store(Request $request)
     {
-        if ($this->client->isAccessTokenExpired()) {
-            $accessToken = $client->fetchAccessTokenWithRefreshToken($client->getRefreshToken());
-            $venue->update([
-                'gcalendar_credentials' => json_encode($accessToken),
-            ]);
+        $input=$request->all();
+        if($this->client->isAccessTokenExpired()) {
+            $this->client->setAccessToken(session()->get('token',''));
         }
-         $request->all();
+        $input=$request->all();
         $service = new \Google_Service_Calendar($this->client);
         $event = new \Google_Service_Calendar_Event(array(
             'summary' => 'Gdvdsvdsv dsddsdsf',
@@ -105,7 +107,7 @@ class GoogleController extends Controller
                 'timeZone' => 'America/Los_Angeles',
             ),
             'end' => array(
-                'dateTime' => '2012-05-28T17:00:00-07:00',
+                'dateTime' => '2018-05-28T17:00:00-07:00',
                 'timeZone' => 'America/Los_Angeles',
             ),
             'recurrence' => array(
@@ -127,7 +129,8 @@ class GoogleController extends Controller
 
         $calendarId = 'primary';
         $event = $service->events->insert($calendarId, $event);
-        printf('Event created: %s\n', $event->htmlLink);
+        return redirect('/');
+//        printf('Event created: %s\n', $event->htmlLink);
         //TODO create payload da ne poyo
 
 //       $res= $service->calendars->insert();
@@ -176,7 +179,14 @@ class GoogleController extends Controller
      */
     public function destroy($id)
     {
+        if($this->client->isAccessTokenExpired()) {
+            $this->client->setAccessToken(session()->get('token',''));
+            // dd($this->client);
+        }
         $service = new \Google_Service_Calendar($this->client);
         $service->events->delete('primary', $id);
+
+        return redirect('/');
     }
+
 }

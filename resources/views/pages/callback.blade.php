@@ -3,15 +3,11 @@
 @endif
 @if($events)
 @foreach( array_first($events) as $event )
-
     @foreach($event as $cal)
         <p>{{$cal['summery']}}</p>
         <p>{{$cal['id']}}</p>
         <a href="delete/{{$cal['id']}}" >delete</a>
     @endforeach
-
-
-
 @endforeach
 @endif
 <form action="/post" method="post">
